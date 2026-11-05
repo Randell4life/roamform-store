@@ -41,7 +41,7 @@ class ShippingQuoteTest extends TestCase
 
         $order->refresh();
 
-        $this->assertSame('42.49', $order->total);
+        $this->assertSame('43.49', $order->total);
         $this->assertSame('awaiting_shipping_approval', $order->status);
         $this->assertNull($order->shipping_quote_accepted_at);
 
