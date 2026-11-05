@@ -1,58 +1,71 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ROAMFORM
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Travel Better. Live Organized.**
 
-## About Laravel
+ROAMFORM is an independent Laravel storefront for a curated collection of travel and home-organization essentials. The project is being built as a custom PHP/Laravel application, with Filament used for private store administration.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Requirements
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.3+
+- Composer
+- Node.js and npm
+- SQLite or MySQL
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Local setup
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Configure the database connection in `.env`. For SQLite, create the database file if it does not exist:
 
-## Contributing
+```bash
+# Windows PowerShell
+New-Item -ItemType File -Force database/database.sqlite
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Then run:
 
-## Code of Conduct
+```bash
+php artisan migrate
+npm install
+npm run build
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Open the storefront at `http://127.0.0.1:8000`.
 
-## Security Vulnerabilities
+## Admin panel
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+The Filament admin panel is available at `/admin`. Register a normal account first, then explicitly grant admin access to that account from the project directory:
 
-## License
+```bash
+php artisan tinker
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+In Tinker, replace the email with the account you registered:
+
+```php
+App\\Models\\User::where('email', 'your-email@example.com')->update(['is_admin' => true]);
+```
+
+Only users with `is_admin = true` can access the admin panel. New accounts are not administrators by default.
+
+The Products section supports creating, editing, publishing, unpublishing, searching, and deleting products. A product is shown on the public storefront only when **Published on storefront** is enabled.
+
+## Current scope
+
+- Public storefront and product detail pages
+- Product database and migrations
+- Filament admin authentication and product management
+- Supplier reference fields for future dropshipping integration
+
+Checkout, payment processing, and supplier fulfillment are intentionally not enabled yet. Payment-provider eligibility for a Georgia-based business and supplier shipping economics must be verified before accepting customer payments.
+
+## Security
+
+- Never commit `.env`, database files, `vendor/`, or `node_modules/`.
+- Keep new user accounts non-admin by default.
+- Use HTTPS and production-grade secrets before deployment.
