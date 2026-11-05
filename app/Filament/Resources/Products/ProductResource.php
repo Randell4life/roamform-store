@@ -21,7 +21,7 @@ class ProductResource extends Resource {
  protected static ?string $navigationLabel='Products';
  protected static ?string $modelLabel='product';
  protected static ?string $pluralModelLabel='products';
- protected static ?string $navigationGroup='Catalog';
+ protected static string|\UnitEnum|null $navigationGroup='Catalog';
  public static function form(Schema $schema): Schema { return $schema->components([
   TextInput::make('name')->label('Product name')->required()->maxLength(255),
   TextInput::make('slug')->required()->maxLength(255)->unique(ignoreRecord:true),
