@@ -49,6 +49,19 @@
                     @endforeach
                 </ol>
             @endif
+            @if ($order->tracking_number)
+                <div class="shipment-panel">
+                    <div class="eyebrow">Shipment tracking</div>
+                    <h3>{{ $order->shipping_carrier ?: 'Shipping carrier' }}</h3>
+                    <p><strong>Tracking number:</strong> {{ $order->tracking_number }}</p>
+                    @if ($order->shipped_at)
+                        <p><strong>Shipped:</strong> {{ $order->shipped_at->format('M j, Y g:i A') }}</p>
+                    @endif
+                    @if ($order->tracking_url)
+                        <a class="button" href="{{ $order->tracking_url }}" target="_blank" rel="noopener noreferrer">Track shipment</a>
+                    @endif
+                </div>
+            @endif
             <div class="tracking-columns">
                 <div>
                     <h3>Items</h3>

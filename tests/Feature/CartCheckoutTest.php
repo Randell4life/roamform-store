@@ -3,6 +3,8 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderReceived;
 use Tests\TestCase;
 class CartCheckoutTest extends TestCase {
  use RefreshDatabase;
@@ -15,6 +17,7 @@ class CartCheckoutTest extends TestCase {
   $this->assertSame(2,session('cart')[$product->id]);
  }
  public function test_checkout_creates_order_and_reserves_inventory(): void {
+  Mail::fake();
   $product=$this->product(5);
   $this->withSession(['cart'=>[$product->id=>2]])->post(route('checkout.store'),[
    'customer_name'=>'Taylor Customer','customer_email'=>'taylor@example.com','customer_phone'=>'+12025550123',
@@ -23,6 +26,7 @@ class CartCheckoutTest extends TestCase {
   $this->assertDatabaseHas('orders',['customer_email'=>'taylor@example.com','status'=>'pending_review','payment_status'=>'not_paid','total'=>'69.98']);
   $this->assertDatabaseHas('order_items',['product_id'=>$product->id,'quantity'=>2]);
   $this->assertSame(3,$product->fresh()->stock_quantity);
+  Mail::assertSent(OrderReceived::class, fn (OrderReceived $mail): bool => $mail->hasTo('taylor@example.com'));
  }
  public function test_cancelling_order_restores_reserved_inventory(): void {
   $product=$this->product(5);
