@@ -28,5 +28,8 @@ Route::get('/track-order', [OrderTrackingController::class, 'index'])->name('ord
 Route::post('/track-order', [OrderTrackingController::class, 'lookup'])
     ->middleware('throttle:10,1')
     ->name('orders.track.lookup');
+Route::post('/track-order/accept-shipping', [OrderTrackingController::class, 'acceptShippingQuote'])
+    ->middleware('throttle:5,1')
+    ->name('orders.track.accept-shipping');
 Route::post('/track-order/clear', [OrderTrackingController::class, 'clear'])
     ->name('orders.track.clear');

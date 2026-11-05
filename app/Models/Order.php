@@ -15,7 +15,7 @@ class Order extends Model
         'address_line_1', 'address_line_2', 'city', 'state_region', 'postal_code',
         'country', 'customer_note', 'status', 'payment_status', 'currency',
         'subtotal', 'shipping_cost', 'total', 'shipping_carrier', 'tracking_number',
-        'tracking_url', 'shipped_at',
+        'tracking_url', 'shipped_at', 'shipping_quote_accepted_at',
     ];
 
     protected function casts(): array
@@ -25,11 +25,27 @@ class Order extends Model
             'shipping_cost' => 'decimal:2',
             'total' => 'decimal:2',
             'shipped_at' => 'datetime',
+            'shipping_quote_accepted_at' => 'datetime',
         ];
     }
 
     protected static function booted(): void
     {
+        static::saving(function (Order $order): void {
+            if ($order->isDirty(['subtotal', 'shipping_cost'])) {
+                $order->total = (float) $order->subtotal + (float) $order->shipping_cost;
+            }
+
+            if (
+                $order->exists
+                && $order->isDirty('shipping_cost')
+                && $order->status !== 'cancelled'
+            ) {
+                $order->status = 'awaiting_shipping_approval';
+                $order->shipping_quote_accepted_at = null;
+            }
+        });
+
         static::updating(function (Order $order): void {
             if ($order->isDirty('status') && $order->status === 'shipped' && ! $order->shipped_at) {
                 $order->shipped_at = now();

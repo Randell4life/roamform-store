@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class OrderTrackingController extends Controller
@@ -47,6 +48,35 @@ class OrderTrackingController extends Controller
         $request->session()->put('order_tracking_id', $order->getKey());
 
         return redirect()->route('orders.track')->with('success', 'Your order details are ready.');
+    }
+
+    public function acceptShippingQuote(Request $request): RedirectResponse
+    {
+        $orderId = $request->session()->get('order_tracking_id');
+
+        $accepted = DB::transaction(function () use ($orderId): bool {
+            $order = Order::query()->lockForUpdate()->find($orderId);
+
+            if (! $order || $order->status !== 'awaiting_shipping_approval') {
+                return false;
+            }
+
+            $order->update([
+                'status' => 'approved',
+                'payment_status' => 'awaiting_confirmation',
+                'shipping_quote_accepted_at' => now(),
+            ]);
+
+            return true;
+        });
+
+        if (! $accepted) {
+            return redirect()->route('orders.track')
+                ->withErrors(['shipping_quote' => 'There is no pending shipping quote to approve.']);
+        }
+
+        return redirect()->route('orders.track')
+            ->with('success', 'Shipping quote accepted. We will contact you with payment instructions.');
     }
 
     public function clear(Request $request): RedirectResponse
