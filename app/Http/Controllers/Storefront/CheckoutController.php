@@ -37,6 +37,7 @@ class CheckoutController extends Controller {
    foreach($cart as $productId=>$quantity) {
     $product=$products->get($productId);
     $order->items()->create(['product_id'=>$product->id,'product_name'=>$product->name,'sku'=>$product->sku,'unit_price'=>$product->price,'quantity'=>$quantity,'line_total'=>(float)$product->price*(int)$quantity]);
+    $product->decrement('stock_quantity', (int) $quantity);
    }
    return $order;
   });
