@@ -39,6 +39,7 @@ class OrderStatusUpdated extends Mailable
     {
         return match ($this->order->status) {
             'pending_review' => 'Under review',
+            'awaiting_shipping_approval' => 'Shipping quote ready — your approval is needed',
             'approved' => 'Confirmed',
             'processing' => 'Being prepared',
             'shipped' => 'Shipped',

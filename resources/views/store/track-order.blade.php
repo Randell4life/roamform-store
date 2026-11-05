@@ -16,9 +16,10 @@
 
     @if ($order)
         @php
-            $steps = ['pending_review', 'approved', 'processing', 'shipped', 'completed'];
+            $steps = ['pending_review', 'awaiting_shipping_approval', 'approved', 'processing', 'shipped', 'completed'];
             $labels = [
                 'pending_review' => 'Under review',
+                'awaiting_shipping_approval' => 'Shipping quote',
                 'approved' => 'Confirmed',
                 'processing' => 'Being prepared',
                 'shipped' => 'Shipped',
@@ -49,17 +50,33 @@
                     @endforeach
                 </ol>
             @endif
+
+            @if ($order->status === 'awaiting_shipping_approval')
+                <div class="shipment-panel">
+                    <div class="eyebrow">Shipping quote ready</div>
+                    <h3>Please review your final order total</h3>
+                    <p>Shipping: <strong>&#36;{{ number_format((float) $order->shipping_cost, 2) }} USD</strong></p>
+                    <p>Final total: <strong>&#36;{{ number_format((float) $order->total, 2) }} USD</strong></p>
+                    <p>Accepting this quote confirms the order. We will then contact you with payment instructions. No payment is collected on this page.</p>
+                    <form method="POST" action="{{ route('orders.track.accept-shipping') }}">
+                        @csrf
+                        <button class="button" type="submit">Approve shipping &amp; total</button>
+                    </form>
+                </div>
+            @elseif ($order->shipping_quote_accepted_at)
+                <div class="shipment-panel">
+                    <div class="eyebrow">Shipping quote approved</div>
+                    <p>You approved the shipping quote on {{ $order->shipping_quote_accepted_at->format('M j, Y g:i A') }}. Our team will contact you with payment instructions.</p>
+                </div>
+            @endif
+
             @if ($order->tracking_number)
                 <div class="shipment-panel">
                     <div class="eyebrow">Shipment tracking</div>
                     <h3>{{ $order->shipping_carrier ?: 'Shipping carrier' }}</h3>
                     <p><strong>Tracking number:</strong> {{ $order->tracking_number }}</p>
-                    @if ($order->shipped_at)
-                        <p><strong>Shipped:</strong> {{ $order->shipped_at->format('M j, Y g:i A') }}</p>
-                    @endif
-                    @if ($order->tracking_url)
-                        <a class="button" href="{{ $order->tracking_url }}" target="_blank" rel="noopener noreferrer">Track shipment</a>
-                    @endif
+                    @if ($order->shipped_at)<p><strong>Shipped:</strong> {{ $order->shipped_at->format('M j, Y g:i A') }}</p>@endif
+                    @if ($order->tracking_url)<a class="button" href="{{ $order->tracking_url }}" target="_blank" rel="noopener noreferrer">Track shipment</a>@endif
                 </div>
             @endif
             <div class="tracking-columns">
@@ -72,7 +89,7 @@
                 <div>
                     <h3>Order summary</h3>
                     <div class="summary-line"><span>Subtotal</span><strong>&#36;{{ number_format((float) $order->subtotal, 2) }}</strong></div>
-                    <div class="summary-line"><span>Shipping</span><strong>{{ $order->shipping_cost > 0 ? '$'.number_format((float) $order->shipping_cost, 2) : 'To be confirmed' }}</strong></div>
+                    <div class="summary-line"><span>Shipping</span><strong>{{ $order->status === 'pending_review' ? 'To be confirmed' : ($order->shipping_cost > 0 ? '$'.number_format((float) $order->shipping_cost, 2) : 'Free') }}</strong></div>
                     <div class="summary-line"><span>Total</span><strong>&#36;{{ number_format((float) $order->total, 2) }} {{ $order->currency }}</strong></div>
                     <div class="summary-line"><span>Payment</span><strong>{{ str($order->payment_status)->replace('_', ' ')->title() }}</strong></div>
                 </div>

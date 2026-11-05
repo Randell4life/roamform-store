@@ -30,6 +30,7 @@ class OrderResource extends Resource
             TextInput::make('order_number')->disabled(),
             Select::make('status')->options([
                 'pending_review' => 'Pending review',
+                'awaiting_shipping_approval' => 'Awaiting shipping approval',
                 'approved' => 'Approved',
                 'processing' => 'Processing',
                 'shipped' => 'Shipped',
@@ -52,6 +53,15 @@ class OrderResource extends Resource
             TextInput::make('postal_code')->disabled(),
             TextInput::make('country')->disabled(),
             Textarea::make('customer_note')->disabled()->columnSpanFull(),
+            TextInput::make('subtotal')->prefix('USD')->disabled(),
+            TextInput::make('shipping_cost')
+                ->label('Shipping cost')
+                ->numeric()
+                ->minValue(0)
+                ->step('0.01')
+                ->prefix('USD')
+                ->required()
+                ->helperText('Saving a changed shipping cost recalculates the total and asks the customer to approve the quote.'),
             TextInput::make('total')->prefix('USD')->disabled(),
             TextInput::make('shipping_carrier')->label('Shipping carrier')->maxLength(100),
             TextInput::make('tracking_number')->label('Tracking number')->maxLength(150),
@@ -70,7 +80,7 @@ class OrderResource extends Resource
             TextColumn::make('status')->badge()->color(fn (string $state): string => match ($state) {
                 'completed' => 'success',
                 'cancelled' => 'danger',
-                'pending_review' => 'warning',
+                'pending_review', 'awaiting_shipping_approval' => 'warning',
                 default => 'info',
             }),
             TextColumn::make('payment_status')->badge(),
