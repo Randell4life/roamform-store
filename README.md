@@ -2,7 +2,7 @@
 
 **Travel Better. Live Organized.**
 
-ROAMFORM is an independent Laravel storefront for a curated collection of travel and home-organization essentials. The project is being built as a custom PHP/Laravel application, with Filament used for private store administration.
+ROAMFORM is an independent Laravel storefront for a curated collection of travel and home-organization essentials. The project is built as a custom PHP/Laravel application, with Filament used for private store administration.
 
 ## Requirements
 
@@ -21,8 +21,7 @@ php artisan key:generate
 
 Configure the database connection in `.env`. For SQLite, create the database file if it does not exist:
 
-```bash
-# Windows PowerShell
+```powershell
 New-Item -ItemType File -Force database/database.sqlite
 ```
 
@@ -39,7 +38,7 @@ Open the storefront at `http://127.0.0.1:8000`.
 
 ## Admin panel
 
-The Filament admin panel is available at `/admin`. Register a normal account first, then explicitly grant admin access to that account from the project directory:
+The Filament admin panel is available at `/admin`. Register a normal account first, then explicitly grant admin access to that account:
 
 ```bash
 php artisan tinker
@@ -48,7 +47,7 @@ php artisan tinker
 In Tinker, replace the email with the account you registered:
 
 ```php
-App\\Models\\User::where('email', 'your-email@example.com')->update(['is_admin' => true]);
+App\Models\User::where('email', 'your-email@example.com')->update(['is_admin' => true]);
 ```
 
 Only users with `is_admin = true` can access the admin panel. New accounts are not administrators by default.
