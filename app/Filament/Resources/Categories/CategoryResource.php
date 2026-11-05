@@ -18,7 +18,7 @@ class CategoryResource extends Resource {
  protected static ?string $navigationLabel='Categories';
  protected static ?string $modelLabel='category';
  protected static ?string $pluralModelLabel='categories';
- protected static ?string $navigationGroup='Catalog';
+ protected static string|\UnitEnum|null $navigationGroup='Catalog';
  public static function form(Schema $schema): Schema { return $schema->components([
   TextInput::make('name')->required()->maxLength(255),
   TextInput::make('slug')->required()->maxLength(255)->unique(ignoreRecord:true),
