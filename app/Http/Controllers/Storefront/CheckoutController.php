@@ -3,6 +3,9 @@ namespace App\Http\Controllers\Storefront;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
+use App\Mail\OrderReceived;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +45,15 @@ class CheckoutController extends Controller {
    return $order;
   });
   session()->forget('cart');
+  try {
+   $freshOrder = $order->fresh('items');
+   Mail::to($freshOrder->customer_email)->send(new OrderReceived($freshOrder));
+  } catch (\Throwable $exception) {
+   Log::warning('ROAMFORM order received email could not be sent.', [
+    'order_id' => $order->getKey(),
+    'message' => $exception->getMessage(),
+   ]);
+  }
   return redirect()->route('checkout.success',$order->order_number);
  }
  public function success(Order $order): View { $order->load('items'); return view('store.order-confirmation',compact('order')); }
