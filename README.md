@@ -38,19 +38,25 @@ Open the storefront at `http://127.0.0.1:8000`.
 
 ## Admin panel
 
-The Filament admin panel is available at `/admin`. Register a normal account first, then explicitly grant admin access to that account:
+The Filament admin panel is available at `/admin`. This starter project does not include a public account-registration page. Create the first administrator from Tinker:
 
 ```bash
 php artisan tinker
 ```
 
-In Tinker, replace the email with the account you registered:
+Then run the following, replacing the email and password with your own values:
 
 ```php
-App\Models\User::where('email', 'your-email@example.com')->update(['is_admin' => true]);
+$user = App\Models\User::create([
+    'name' => 'Store Admin',
+    'email' => 'admin@example.com',
+    'password' => 'change-this-password',
+]);
+
+$user->forceFill(['is_admin' => true])->save();
 ```
 
-Only users with `is_admin = true` can access the admin panel. New accounts are not administrators by default.
+Only users with `is_admin = true` can access the admin panel. New users are not administrators by default.
 
 The Products section supports creating, editing, publishing, unpublishing, searching, and deleting products. A product is shown on the public storefront only when **Published on storefront** is enabled.
 
